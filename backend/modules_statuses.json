@@ -1,0 +1,12 @@
+{
+    "Core": true,
+    "Media": true,
+    "Employee": true,
+    "Shift": true,
+    "Attendance": true,
+    "Leave": true,
+    "Payroll": true,
+    "Project": true,
+    "Expense": true,
+    "Notice": true
+}

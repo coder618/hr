@@ -1,0 +1,20 @@
+{
+    "name": "office-management/workspace",
+    "description": "Multi-Tenant SaaS Office Management System for cPanel Shared Hosting",
+    "type": "project",
+    "license": "proprietary",
+    "scripts": {
+        "setup": [
+            "echo 'Setting up backend...'",
+            "cd backend && composer install && cp -n .env.example .env && php artisan key:generate && touch database/database.sqlite && php artisan migrate --force",
+            "echo 'Setting up frontend...'",
+            "cd frontend && npm install"
+        ],
+        "test": [
+            "cd backend && php artisan test",
+            "cd frontend && npm run build"
+        ],
+        "build:release": "bash deploy/build-release.sh",
+        "preflight": "cd backend && php artisan app:preflight"
+    }
+}

@@ -1,0 +1,24 @@
+# ==============================================================================
+# cPanel Cron Configuration for Office Management System
+# ==============================================================================
+# In cPanel -> Cron Jobs (Advanced/Standard):
+# Set schedule to: Once Per Minute (* * * * *)
+#
+# Replace /home/USER with your actual cPanel home directory path (check cPanel sidebar).
+# Replace /usr/local/bin/php with your MultiPHP PHP 8.2 or 8.3 CLI binary path
+# (usually /usr/local/bin/ea-php82 or /usr/local/bin/ea-php83 or /opt/cpanel/ea-php82/root/usr/bin/php).
+#
+# Single master cron that drives:
+# 1. Queue processing (runs queue:work --stop-when-empty --max-time=50 every minute)
+# 2. Daily attendance processing
+# 3. Monthly leave accrual
+# 4. Task deadline notifications
+# 5. Heartbeat monitoring (proves cron is active in admin dashboard)
+# ==============================================================================
+
+* * * * * /usr/local/bin/php /home/USER/office-api/artisan schedule:run >> /dev/null 2>&1
+
+# ==============================================================================
+# Alternative with explicit log file for debugging cron issues:
+# ==============================================================================
+# * * * * * /usr/local/bin/php /home/USER/office-api/artisan schedule:run >> /home/USER/office-api/storage/logs/cron.log 2>&1
