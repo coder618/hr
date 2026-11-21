@@ -34,10 +34,7 @@ import { formatDate, formatTime } from '@/lib/dateUtils';
 
 const formatCurrency = (amount?: number | null) => {
   if (amount === undefined || amount === null) return '—';
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(amount);
+  return `Tk ${Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 };
 
 export const EmployeeDetailsPage: React.FC = () => {

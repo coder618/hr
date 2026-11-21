@@ -7,8 +7,17 @@ export const expenseModuleConfig: ModuleConfig = {
   order: 9,
   routes: [
     {
+      path: '/expenses',
+      component: lazy(() => import('./pages/ExpenseClaimsPage')),
+    },
+    {
       path: '/expenses/claims',
       component: lazy(() => import('./pages/ExpenseClaimsPage')),
+    },
+    {
+      path: '/expenses/office-expenses',
+      component: lazy(() => import('./pages/MonthlyOfficeExpensesPage')),
+      role: 'admin,hr',
     },
     {
       path: '/expenses/categories',
@@ -23,21 +32,34 @@ export const expenseModuleConfig: ModuleConfig = {
   ],
   navigation: [
     {
-      name: 'Expense Claims',
-      path: '/expenses/claims',
+      name: 'Expense Module',
+      path: '/expenses',
       icon: 'Receipt',
-    },
-    {
-      name: 'Budgets & Categories',
-      path: '/expenses/categories',
-      icon: 'Wallet',
-      role: 'admin,hr,manager',
-    },
-    {
-      name: 'Expense Analytics',
-      path: '/expenses/analytics',
-      icon: 'Activity',
-      role: 'admin,hr,manager',
+      children: [
+        {
+          name: 'Expense Claims',
+          path: '/expenses/claims',
+          icon: 'Receipt',
+        },
+        {
+          name: 'Monthly Office Expenses',
+          path: '/expenses/office-expenses',
+          icon: 'Building2',
+          role: 'admin,hr',
+        },
+        {
+          name: 'Budgets & Categories',
+          path: '/expenses/categories',
+          icon: 'Wallet',
+          role: 'admin,hr,manager',
+        },
+        {
+          name: 'Expense Analytics',
+          path: '/expenses/analytics',
+          icon: 'Activity',
+          role: 'admin,hr,manager',
+        },
+      ],
     },
   ],
 };

@@ -7,6 +7,10 @@ export const payrollModuleConfig: ModuleConfig = {
   order: 7,
   routes: [
     {
+      path: '/payroll',
+      component: lazy(() => import('./pages/MyPayslipsPage')),
+    },
+    {
       path: '/payroll/runs',
       component: lazy(() => import('./pages/PayrollRunsPage')),
       role: 'admin,hr',
@@ -28,27 +32,34 @@ export const payrollModuleConfig: ModuleConfig = {
   ],
   navigation: [
     {
-      name: 'Payroll Runs',
-      path: '/payroll/runs',
+      name: 'Payroll Module',
+      path: '/payroll',
       icon: 'Banknote',
-      role: 'admin,hr',
-    },
-    {
-      name: 'Salary Structures',
-      path: '/payroll/structures',
-      icon: 'Briefcase',
-      role: 'admin,hr',
-    },
-    {
-      name: 'Employee Salaries',
-      path: '/payroll/employee-salaries',
-      icon: 'Users',
-      role: 'admin,hr',
-    },
-    {
-      name: 'My Payslips',
-      path: '/payroll/my-payslips',
-      icon: 'Receipt',
+      children: [
+        {
+          name: 'Payroll Runs',
+          path: '/payroll/runs',
+          icon: 'Banknote',
+          role: 'admin,hr',
+        },
+        {
+          name: 'Salary Structures',
+          path: '/payroll/structures',
+          icon: 'Briefcase',
+          role: 'admin,hr',
+        },
+        {
+          name: 'Employee Salaries',
+          path: '/payroll/employee-salaries',
+          icon: 'Users',
+          role: 'admin,hr',
+        },
+        {
+          name: 'My Payslips',
+          path: '/payroll/my-payslips',
+          icon: 'Receipt',
+        },
+      ],
     },
   ],
 };

@@ -37,12 +37,6 @@ export const attendanceModuleConfig: ModuleConfig = {
       icon: 'FileText',
     },
     {
-      name: 'Biometric Devices',
-      path: '/attendance/devices',
-      icon: 'Cpu',
-      role: 'admin,hr',
-    },
-    {
       name: 'Holiday Management',
       path: '/attendance/holidays',
       icon: 'Calendar',

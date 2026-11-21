@@ -7,6 +7,10 @@ export const leaveModuleConfig: ModuleConfig = {
   order: 6,
   routes: [
     {
+      path: '/leave',
+      component: lazy(() => import('./pages/LeaveRequestsPage')),
+    },
+    {
       path: '/leave/requests',
       component: lazy(() => import('./pages/LeaveRequestsPage')),
     },
@@ -26,25 +30,32 @@ export const leaveModuleConfig: ModuleConfig = {
   ],
   navigation: [
     {
-      name: 'Leave Requests',
-      path: '/leave/requests',
-      icon: 'Calendar',
-    },
-    {
-      name: 'Leave Balances',
-      path: '/leave/balances',
-      icon: 'Clock',
-    },
-    {
-      name: 'Leave Calendar',
-      path: '/leave/calendar',
-      icon: 'Calendar',
-    },
-    {
-      name: 'Leave Policies',
-      path: '/leave/settings',
+      name: 'Leave Module',
+      path: '/leave',
       icon: 'Palmtree',
-      role: 'admin,hr',
+      children: [
+        {
+          name: 'Leave Requests',
+          path: '/leave/requests',
+          icon: 'Calendar',
+        },
+        {
+          name: 'Leave Balances',
+          path: '/leave/balances',
+          icon: 'Clock',
+        },
+        {
+          name: 'Leave Calendar',
+          path: '/leave/calendar',
+          icon: 'Calendar',
+        },
+        {
+          name: 'Leave Policies',
+          path: '/leave/settings',
+          icon: 'Palmtree',
+          role: 'admin,hr',
+        },
+      ],
     },
   ],
 };

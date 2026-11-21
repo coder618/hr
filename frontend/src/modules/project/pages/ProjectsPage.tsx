@@ -428,7 +428,7 @@ export const ProjectsPage: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-zinc-500 mb-1">Budget ($)</label>
+                  <label className="block text-xs font-semibold uppercase text-zinc-500 mb-1">Budget (Tk)</label>
                   <input
                     type="number"
                     step="0.01"

@@ -37,7 +37,7 @@ export const coreModuleConfig: ModuleConfig = {
       name: 'Settings',
       path: '/settings',
       icon: 'Settings',
-      role: 'admin',
+      role: 'admin,hr',
       order: 999,
       children: [
         {
@@ -51,6 +51,12 @@ export const coreModuleConfig: ModuleConfig = {
           path: '/system-health',
           icon: 'Activity',
           role: 'admin',
+        },
+        {
+          name: 'Biometric Devices',
+          path: '/attendance/devices',
+          icon: 'Cpu',
+          role: 'admin,hr',
         },
         {
           name: 'Organization Settings',

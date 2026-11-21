@@ -6,8 +6,28 @@ use Modules\Core\Http\Middleware\IdentifyTenant;
 use Modules\Expense\Http\Controllers\DepartmentBudgetController;
 use Modules\Expense\Http\Controllers\ExpenseCategoryController;
 use Modules\Expense\Http\Controllers\ExpenseClaimController;
+use Modules\Expense\Http\Controllers\OfficeExpenseCategoryController;
+use Modules\Expense\Http\Controllers\OfficeExpenseController;
 
 Route::prefix('v1')->middleware(['auth:sanctum', IdentifyTenant::class, EnsureTenantActive::class, 'module:expense'])->group(function () {
+    // Monthly Office Expenses (Strictly Tenant Admin & HR only)
+    Route::middleware('role:admin,hr')->group(function () {
+        // Office Expense Categories
+        Route::get('expenses/office-categories', [OfficeExpenseCategoryController::class, 'index']);
+        Route::post('expenses/office-categories', [OfficeExpenseCategoryController::class, 'store']);
+        Route::get('expenses/office-categories/{id}', [OfficeExpenseCategoryController::class, 'show']);
+        Route::put('expenses/office-categories/{id}', [OfficeExpenseCategoryController::class, 'update']);
+        Route::delete('expenses/office-categories/{id}', [OfficeExpenseCategoryController::class, 'destroy']);
+
+        // Monthly Office Expenses
+        Route::get('expenses/office-expenses', [OfficeExpenseController::class, 'index']);
+        Route::post('expenses/office-expenses', [OfficeExpenseController::class, 'store']);
+        Route::get('expenses/office-expenses/summary', [OfficeExpenseController::class, 'monthlySummary']);
+        Route::get('expenses/office-expenses/export', [OfficeExpenseController::class, 'exportCsv']);
+        Route::get('expenses/office-expenses/{id}', [OfficeExpenseController::class, 'show']);
+        Route::put('expenses/office-expenses/{id}', [OfficeExpenseController::class, 'update']);
+        Route::delete('expenses/office-expenses/{id}', [OfficeExpenseController::class, 'destroy']);
+    });
     // Categories & Budgets Configuration (Admin, HR, Manager)
     Route::middleware('role:admin,hr,manager')->group(function () {
         Route::get('expenses/categories', [ExpenseCategoryController::class, 'index']);

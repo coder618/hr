@@ -107,3 +107,77 @@ export interface BudgetSummary {
   total_remaining: number;
   utilization_percent: number;
 }
+
+export interface OfficeExpenseCategory {
+  id: number;
+  organization_id: number;
+  name: string;
+  code: string;
+  description?: string | null;
+  is_active: boolean;
+  expenses_count?: number;
+  expenses_sum_amount?: number | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface OfficeExpense {
+  id: number;
+  organization_id: number;
+  office_expense_category_id: number;
+  title: string;
+  expense_month: number;
+  expense_year: number;
+  expense_date: string;
+  amount: number;
+  currency: string;
+  payment_status: 'pending' | 'paid' | 'overdue';
+  payment_method?: 'bank_transfer' | 'cash' | 'card' | 'cheque' | 'mobile_banking' | 'other' | null;
+  payment_date?: string | null;
+  reference_no?: string | null;
+  vendor_name?: string | null;
+  notes?: string | null;
+  receipt_media_id?: number | null;
+  recorded_by?: number | null;
+  category?: OfficeExpenseCategory;
+  recorded_by_user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  receipt_media?: {
+    id: number;
+    file_name: string;
+    file_path: string;
+    file_size: number;
+    mime_type: string;
+  };
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface MonthlyOfficeExpenseSummary {
+  year: number;
+  month: number | null;
+  total_amount: number;
+  paid_amount: number;
+  pending_amount: number;
+  overdue_amount: number;
+  total_count: number;
+  category_breakdown: Array<{
+    category_id: number;
+    category_name: string;
+    category_code: string;
+    count: number;
+    total_amount: number;
+    percentage: number;
+  }>;
+  monthly_trend: Array<{
+    month: number;
+    month_name: string;
+    total_amount: number;
+    paid_amount: number;
+    pending_amount: number;
+    count: number;
+  }>;
+}

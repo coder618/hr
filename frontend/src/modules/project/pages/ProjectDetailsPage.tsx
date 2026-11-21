@@ -382,7 +382,7 @@ export const ProjectDetailsPage: React.FC = () => {
           <div>
             <span className="text-[11px] font-semibold uppercase text-zinc-500">Budget</span>
             <div className="font-semibold text-zinc-900 text-sm">
-              ${project.budget.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              Tk {project.budget.toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </div>
           </div>
           <div>
@@ -965,7 +965,7 @@ export const ProjectDetailsPage: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-zinc-500 mb-1">Budget ($)</label>
+                  <label className="block text-xs font-semibold uppercase text-zinc-500 mb-1">Budget (Tk)</label>
                   <input
                     type="number"
                     step="0.01"
