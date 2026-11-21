@@ -40,7 +40,14 @@ class Employee extends Model
 
     protected $appends = [
         'full_name',
+        'avatar_url',
     ];
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        $avatar = $this->getFirstMedia('avatar');
+        return $avatar ? $avatar->getUrl() : null;
+    }
 
     protected static function boot(): void
     {
@@ -108,5 +115,32 @@ class Employee extends Model
     public function salary(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(\Modules\Payroll\Entities\EmployeeSalary::class);
+    }
+
+    public function projects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(\Modules\Project\Entities\Project::class, 'project_members', 'employee_id', 'project_id')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    public function assignedTasks(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\Modules\Project\Entities\Task::class, 'assignee_id');
+    }
+
+    public function payslips(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\Modules\Payroll\Entities\Payslip::class, 'employee_id')->orderBy('year', 'desc')->orderBy('month', 'desc');
+    }
+
+    public function attendanceRecords(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\Modules\Attendance\Entities\AttendanceRecord::class, 'employee_id')->orderBy('date', 'desc');
+    }
+
+    public function leaveBalances(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\Modules\Leave\Entities\LeaveBalance::class, 'employee_id')->with('leaveType');
     }
 }

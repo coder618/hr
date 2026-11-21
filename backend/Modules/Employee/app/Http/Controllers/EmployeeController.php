@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -13,10 +14,15 @@ use Modules\Core\Contracts\TenantContextInterface;
 use Modules\Core\Traits\ApiResponseTrait;
 use Modules\Employee\Entities\Employee;
 use Modules\Media\Entities\Media;
+use Modules\Media\Services\MediaService;
 
 class EmployeeController extends Controller
 {
     use ApiResponseTrait;
+
+    public function __construct(
+        protected MediaService $mediaService
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -25,6 +31,7 @@ class EmployeeController extends Controller
             'department:id,name',
             'designation:id,name',
             'reportingManager:id,first_name,last_name,employee_code',
+            'media',
         ]);
 
         if ($request->filled('search')) {
@@ -108,17 +115,27 @@ class EmployeeController extends Controller
             'joining_date' => 'required|date',
             'employment_type' => 'nullable|string|in:full_time,part_time,contract,intern',
             'status' => 'nullable|string|in:active,probation,suspended,terminated,resigned',
-            'emergency_contact' => 'nullable|array',
-            'address' => 'nullable|array',
-            'bank_details' => 'nullable|array',
-            'create_user_account' => 'nullable|boolean',
+            'emergency_contact' => 'nullable',
+            'address' => 'nullable',
+            'bank_details' => 'nullable',
+            'create_user_account' => 'nullable',
             'user_password' => 'nullable|string|min:8',
+            'avatar' => 'nullable|file|image|max:10240',
+            'avatar_media_id' => 'nullable|integer|exists:media,id',
+            'documents' => 'nullable|array',
+            'documents.*' => 'nullable|file|max:51200',
+            'document_media_ids' => 'nullable|array',
+            'document_media_ids.*' => 'integer|exists:media,id',
+            'document_titles' => 'nullable|array',
+            'document_titles.*' => 'nullable|string|max:191',
         ]);
 
-        return DB::transaction(function () use ($validated, $tenantId) {
+        return DB::transaction(function () use ($validated, $request, $tenantId) {
             $userId = null;
+            $createUser = filter_var($validated['create_user_account'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
-            if (!empty($validated['create_user_account'])) {
+            $user = null;
+            if ($createUser) {
                 $password = !empty($validated['user_password']) ? $validated['user_password'] : Str::random(12);
 
                 $user = User::create([
@@ -134,13 +151,70 @@ class EmployeeController extends Controller
                 $userId = $user->id;
             }
 
-            unset($validated['create_user_account'], $validated['user_password']);
+            foreach (['emergency_contact', 'address', 'bank_details'] as $field) {
+                if (isset($validated[$field]) && is_string($validated[$field])) {
+                    $decoded = json_decode($validated[$field], true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $validated[$field] = $decoded;
+                    }
+                }
+            }
+
+            unset(
+                $validated['create_user_account'],
+                $validated['user_password'],
+                $validated['avatar'],
+                $validated['avatar_media_id'],
+                $validated['documents'],
+                $validated['document_media_ids'],
+                $validated['document_titles']
+            );
             $validated['user_id'] = $userId;
 
             $employee = Employee::create($validated);
 
+            // Handle user image upload (direct file or existing media ID)
+            $avatarMediaId = null;
+            if ($request->hasFile('avatar')) {
+                $avatarMedia = $this->mediaService->uploadFile($request->file('avatar'), null, $request->user()?->id);
+                $avatarMediaId = $avatarMedia->id;
+            } elseif ($request->filled('avatar_media_id')) {
+                $avatarMediaId = (int) $request->input('avatar_media_id');
+            }
+
+            if ($avatarMediaId) {
+                $employee->attachMedia($avatarMediaId, 'avatar');
+                if ($user) {
+                    $mediaRecord = Media::find($avatarMediaId);
+                    if ($mediaRecord) {
+                        $user->update(['avatar' => $mediaRecord->getUrl()]);
+                    }
+                }
+            }
+
+            // Handle document uploads (direct files or existing media IDs)
+            if ($request->hasFile('documents')) {
+                $docFiles = $request->file('documents');
+                $titles = $request->input('document_titles', []);
+                foreach ($docFiles as $idx => $docFile) {
+                    if ($docFile instanceof UploadedFile) {
+                        $docMedia = $this->mediaService->uploadFile($docFile, null, $request->user()?->id);
+                        if (!empty($titles[$idx])) {
+                            $docMedia->update(['title' => $titles[$idx]]);
+                        }
+                        $employee->attachMedia($docMedia->id, 'documents');
+                    }
+                }
+            }
+
+            if ($request->filled('document_media_ids') && is_array($request->input('document_media_ids'))) {
+                foreach ($request->input('document_media_ids') as $docId) {
+                    $employee->attachMedia((int) $docId, 'documents');
+                }
+            }
+
             return $this->successResponse(
-                $employee->load(['branch', 'department', 'designation', 'reportingManager', 'user']),
+                $employee->load(['branch', 'department', 'designation', 'reportingManager', 'user', 'media']),
                 'Employee created successfully.',
                 null,
                 201
@@ -158,14 +232,28 @@ class EmployeeController extends Controller
             'directReports',
             'user:id,name,email,is_active,avatar',
             'media',
+            'salary.structure',
+            'projects:id,title,code,status,priority,start_date,due_date',
+            'assignedTasks' => function ($q) {
+                $q->with('project:id,title,code')->limit(15);
+            },
+            'payslips' => function ($q) {
+                $q->limit(12);
+            },
+            'attendanceRecords' => function ($q) {
+                $q->limit(30);
+            },
+            'leaveBalances.leaveType',
         ])->findOrFail($id);
 
         $user = $request->user();
         if ($user && !$user->isSuperAdmin()) {
             $roles = $user->getRoleNames()->toArray();
-            $isEmployeeOnly = in_array('employee', $roles) && !in_array('admin', $roles) && !in_array('hr', $roles) && !in_array('manager', $roles);
-            if ($isEmployeeOnly && $employee->user_id !== $user->id && $employee->email !== $user->email) {
-                return $this->errorResponse('Forbidden: You do not have permission to view other employee profiles.', null, 403);
+            $isAdminOrHr = in_array('admin', $roles) || in_array('hr', $roles);
+            $isSelf = ($employee->user_id && $employee->user_id === $user->id) || $employee->email === $user->email;
+
+            if (!$isAdminOrHr && !$isSelf) {
+                return $this->errorResponse('Forbidden: Only Administrators, HR, and the account owner can view this employee profile.', null, 403);
             }
         }
 

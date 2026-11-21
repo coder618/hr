@@ -12,6 +12,11 @@ export const employeeModuleConfig: ModuleConfig = {
       role: 'admin,hr,manager',
     },
     {
+      path: '/employees/create',
+      component: lazy(() => import('./pages/AddEmployeePage')),
+      role: 'admin,hr',
+    },
+    {
       path: '/employees/:id',
       component: lazy(() => import('./pages/EmployeeDetailsPage')),
     },
@@ -27,6 +32,20 @@ export const employeeModuleConfig: ModuleConfig = {
       path: '/employees',
       icon: 'Users',
       role: 'admin,hr,manager',
+      children: [
+        {
+          name: 'Add Employee',
+          path: '/employees/create',
+          icon: 'UserPlus',
+          role: 'admin,hr',
+        },
+        {
+          name: 'List employee',
+          path: '/employees',
+          icon: 'Users',
+          role: 'admin,hr,manager',
+        },
+      ],
     },
     {
       name: 'Org Structure',

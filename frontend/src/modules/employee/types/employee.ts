@@ -80,6 +80,81 @@ export interface EmployeeMediaItem {
   };
 }
 
+export interface EmployeeProject {
+  id: number;
+  title: string;
+  code: string;
+  status: string;
+  priority: string;
+  start_date?: string | null;
+  due_date?: string | null;
+  pivot?: {
+    role: string;
+  };
+}
+
+export interface EmployeeTask {
+  id: number;
+  project_id: number;
+  title: string;
+  status: string;
+  priority: string;
+  due_date?: string | null;
+  project?: {
+    id: number;
+    title: string;
+    code: string;
+  };
+}
+
+export interface EmployeePayslip {
+  id: number;
+  payslip_number: string;
+  year: number;
+  month: number;
+  gross_pay: number;
+  total_deductions: number;
+  net_pay: number;
+  payment_status: string;
+  payment_method?: string | null;
+  pdf_path?: string | null;
+}
+
+export interface EmployeeAttendanceRecord {
+  id: number;
+  date: string;
+  status: 'present' | 'late' | 'absent' | 'half_day' | 'on_leave';
+  clock_in?: string | null;
+  clock_out?: string | null;
+  work_minutes?: number;
+  is_late?: boolean;
+  late_minutes?: number;
+}
+
+export interface EmployeeLeaveBalance {
+  id: number;
+  year: number;
+  allocated_days: number;
+  used_days: number;
+  pending_days: number;
+  leave_type?: {
+    id: number;
+    name: string;
+    code: string;
+    color?: string;
+  };
+}
+
+export interface EmployeeSalaryInfo {
+  id: number;
+  base_salary: number;
+  payment_type: string;
+  structure?: {
+    id: number;
+    name: string;
+  };
+}
+
 export interface Employee {
   id: number;
   uuid: string;
@@ -93,6 +168,7 @@ export interface Employee {
   first_name: string;
   last_name: string;
   full_name: string;
+  avatar_url?: string | null;
   email: string;
   phone?: string | null;
   gender?: 'male' | 'female' | 'other' | null;
@@ -110,6 +186,12 @@ export interface Employee {
   direct_reports?: Employee[];
   user?: { id: number; name: string; email: string; is_active: boolean; avatar?: string } | null;
   media?: EmployeeMediaItem[];
+  salary?: EmployeeSalaryInfo | null;
+  projects?: EmployeeProject[];
+  assigned_tasks?: EmployeeTask[];
+  payslips?: EmployeePayslip[];
+  attendance_records?: EmployeeAttendanceRecord[];
+  leave_balances?: EmployeeLeaveBalance[];
   created_at?: string;
   updated_at?: string;
 }

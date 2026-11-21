@@ -230,6 +230,55 @@ class EmployeeModuleTest extends TestCase
             ->assertJsonCount(1, 'data');
     }
 
+    public function test_can_create_employee_with_user_image_and_documents(): void
+    {
+        $branch = Branch::create([
+            'organization_id' => $this->orgA->id,
+            'name' => 'HQ Photo Branch',
+            'code' => 'HQ-PB',
+        ]);
+
+        $avatarFile = UploadedFile::fake()->image('profile.jpg', 200, 200);
+        $doc1 = UploadedFile::fake()->create('resume.pdf', 500, 'application/pdf');
+        $doc2 = UploadedFile::fake()->create('contract.docx', 300, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+
+        $response = $this->withHeader('Authorization', "Bearer {$this->tokenA}")
+            ->post('/api/v1/employees', [
+                'first_name' => 'Robert',
+                'last_name' => 'Taylor',
+                'email' => 'robert.taylor@acme.com',
+                'employee_code' => 'EMP-ROB',
+                'branch_id' => $branch->id,
+                'joining_date' => '2026-03-01',
+                'employment_type' => 'full_time',
+                'status' => 'active',
+                'create_user_account' => '1',
+                'user_password' => 'secret12345',
+                'avatar' => $avatarFile,
+                'documents' => [$doc1, $doc2],
+                'document_titles' => ['Employee CV', 'Employment Agreement'],
+            ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.employee_code', 'EMP-ROB');
+
+        $employeeId = $response->json('data.id');
+        $employee = Employee::with('media')->findOrFail($employeeId);
+
+        // Check avatar attached
+        $this->assertNotNull($employee->avatar_url);
+        $this->assertEquals(1, $employee->media()->wherePivot('collection', 'avatar')->count());
+
+        // Check documents attached
+        $this->assertEquals(2, $employee->media()->wherePivot('collection', 'documents')->count());
+
+        // Check user account avatar is set
+        $user = User::where('email', 'robert.taylor@acme.com')->first();
+        $this->assertNotNull($user);
+        $this->assertNotNull($user->avatar);
+    }
+
     public function test_can_attach_and_detach_media_documents_to_employee(): void
     {
         $branch = Branch::create([

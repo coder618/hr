@@ -78,6 +78,13 @@ trait HasMedia
      */
     public function getFirstMedia(string $collection = 'default'): ?Media
     {
+        if ($this->relationLoaded('media')) {
+            return $this->media
+                ->where('pivot.collection', $collection)
+                ->sortBy('pivot.order_column')
+                ->first();
+        }
+
         return $this->media()
             ->wherePivot('collection', $collection)
             ->orderBy('order_column')

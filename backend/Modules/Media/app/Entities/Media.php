@@ -42,6 +42,21 @@ class Media extends Model
         'height' => 'integer',
     ];
 
+    protected $appends = [
+        'preview_url',
+        'thumbnail_url',
+    ];
+
+    public function getPreviewUrlAttribute(): string
+    {
+        return $this->getUrl();
+    }
+
+    public function getThumbnailUrlAttribute(): string
+    {
+        return $this->getThumbnailUrl();
+    }
+
     protected static function boot()
     {
         parent::boot();

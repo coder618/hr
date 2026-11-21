@@ -24,6 +24,7 @@ import {
   Palmtree,
   CornerUpLeft,
   ChevronDown,
+  UserPlus,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { moduleRegistry } from '@/lib/moduleRegistry';
@@ -33,6 +34,7 @@ const iconMap: Record<string, React.ElementType> = {
   LayoutDashboard,
   Building2,
   Users,
+  UserPlus,
   Clock,
   Calendar,
   Fingerprint,

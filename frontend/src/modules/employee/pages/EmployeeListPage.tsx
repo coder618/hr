@@ -3,7 +3,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { usePermission } from '@/hooks/usePermission';
 import api from '@/lib/api';
-import { Employee, Branch, Department, Designation } from '../types/employee';
+import { Employee, Branch, Department } from '../types/employee';
+import { EmployeeForm } from '../components/EmployeeForm';
 import {
   Users,
   Search,
@@ -14,7 +15,25 @@ import {
   ChevronRight,
   FileSpreadsheet,
   Loader2,
+  X,
 } from 'lucide-react';
+
+const formatJoinDate = (dateStr?: string | null) => {
+  if (!dateStr) return '—';
+  const match = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
+  if (match) {
+    const [, year, month, day, hours = '00', minutes = '00'] = match;
+    return `${day}-${month}-${year} ${hours}:${minutes}`;
+  }
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return String(dateStr);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${day}-${month}-${year} ${hours}:${minutes}`;
+};
 
 export const EmployeeListPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -55,14 +74,6 @@ export const EmployeeListPage: React.FC = () => {
     },
   });
 
-  const { data: designations = [] } = useQuery<Designation[]>({
-    queryKey: ['designations'],
-    queryFn: async () => {
-      const res = await api.get('/designations');
-      return res.data.data;
-    },
-  });
-
   // Main Employees Query
   const { data: employeeData, isLoading } = useQuery({
     queryKey: ['employees', page, search, branchFilter, deptFilter, statusFilter, typeFilter],
@@ -82,20 +93,6 @@ export const EmployeeListPage: React.FC = () => {
         items: res.data.data as Employee[],
         meta: res.data.meta,
       };
-    },
-  });
-
-  // Create Employee Mutation
-  const createEmployeeMutation = useMutation({
-    mutationFn: async (payload: any) => {
-      return api.post('/employees', payload);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] });
-      setIsAddModalOpen(false);
-    },
-    onError: (err: any) => {
-      alert(err.response?.data?.message || 'Failed to create employee.');
     },
   });
 
@@ -200,12 +197,12 @@ export const EmployeeListPage: React.FC = () => {
                 >
                   <Upload className="h-4 w-4" /> Import CSV
                 </button>
-                <button
-                  onClick={() => setIsAddModalOpen(true)}
+                <Link
+                  to="/employees/create"
                   className="flex items-center gap-1.5 rounded-lg bg-black text-white hover:bg-zinc-800 px-4 py-2 text-xs font-medium transition-colors"
                 >
                   <Plus className="h-4 w-4" /> Add Employee
-                </button>
+                </Link>
               </>
             )}
           </div>
@@ -333,9 +330,19 @@ export const EmployeeListPage: React.FC = () => {
                   <tr key={emp.id} className="hover:bg-zinc-50/50">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-xs font-bold text-black">
-                          {emp.first_name[0]}
-                          {emp.last_name[0]}
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-xs font-bold text-black overflow-hidden shrink-0">
+                          {emp.avatar_url ? (
+                            <img
+                              src={emp.avatar_url}
+                              alt={emp.full_name}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <>
+                              {emp.first_name[0]}
+                              {emp.last_name[0]}
+                            </>
+                          )}
                         </div>
                         <div>
                           <p className="font-semibold text-zinc-950">{emp.full_name}</p>
@@ -351,16 +358,17 @@ export const EmployeeListPage: React.FC = () => {
                     <td className="px-4 py-3 capitalize">{emp.employment_type.replace('_', ' ')}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${
-                          emp.status === 'active'
-                            ? 'bg-zinc-100 text-zinc-900  '
-                            : 'bg-zinc-100 text-zinc-900  '
-                        }`}
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${emp.status === 'active'
+                          ? 'bg-zinc-100 text-zinc-900  '
+                          : 'bg-zinc-100 text-zinc-900  '
+                          }`}
                       >
                         {emp.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3">{emp.joining_date}</td>
+                    <td className="px-4 py-3 font-mono text-[11px] text-zinc-600">
+                      {formatJoinDate(emp.joining_date)}
+                    </td>
                     <td className="px-4 py-3 text-right">
                       <Link
                         to={`/employees/${emp.id}`}
@@ -406,221 +414,25 @@ export const EmployeeListPage: React.FC = () => {
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
-            <h3 className="text-lg font-semibold text-zinc-950">Add New Employee</h3>
-            <p className="text-xs text-zinc-500">Fill in personal and organizational details.</p>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                createEmployeeMutation.mutate({
-                  first_name: formData.get('first_name'),
-                  last_name: formData.get('last_name'),
-                  email: formData.get('email'),
-                  employee_code: formData.get('employee_code'),
-                  phone: formData.get('phone'),
-                  branch_id: formData.get('branch_id'),
-                  department_id: formData.get('department_id') || null,
-                  designation_id: formData.get('designation_id') || null,
-                  joining_date: formData.get('joining_date'),
-                  employment_type: formData.get('employment_type'),
-                  status: formData.get('status'),
-                  create_user_account: formData.get('create_user_account') === 'on',
-                  user_password: formData.get('user_password') || undefined,
-                });
-              }}
-              className="mt-4 space-y-4"
-            >
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-zinc-800">
-                    First Name *
-                  </label>
-                  <input
-                    name="first_name"
-                    required
-                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-800">
-                    Last Name *
-                  </label>
-                  <input
-                    name="last_name"
-                    required
-                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  />
-                </div>
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-3 mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-zinc-950">Add New Employee</h3>
+                <p className="text-xs text-zinc-500">Fill in personal details, upload photo and documents.</p>
               </div>
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(false)}
+                className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors cursor-pointer"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-zinc-800">
-                    Official Email *
-                  </label>
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-800">
-                    Employee Code *
-                  </label>
-                  <input
-                    name="employee_code"
-                    required
-                    placeholder="EMP-001"
-                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-zinc-800">
-                    Branch *
-                  </label>
-                  <select
-                    name="branch_id"
-                    required
-                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  >
-                    <option value="">Select Branch</option>
-                    {branches.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-800">
-                    Department
-                  </label>
-                  <select
-                    name="department_id"
-                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  >
-                    <option value="">None</option>
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-800">
-                    Designation
-                  </label>
-                  <select
-                    name="designation_id"
-                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  >
-                    <option value="">None</option>
-                    {designations.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-zinc-800">
-                    Joining Date *
-                  </label>
-                  <input
-                    name="joining_date"
-                    type="date"
-                    required
-                    defaultValue={new Date().toISOString().split('T')[0]}
-                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-800">
-                    Employment Type
-                  </label>
-                  <select
-                    name="employment_type"
-                    defaultValue="full_time"
-                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  >
-                    <option value="full_time">Full Time</option>
-                    <option value="part_time">Part Time</option>
-                    <option value="contract">Contract</option>
-                    <option value="intern">Intern</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-zinc-800">
-                    Status
-                  </label>
-                  <select
-                    name="status"
-                    defaultValue="active"
-                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  >
-                    <option value="active">Active</option>
-                    <option value="probation">Probation</option>
-                    <option value="suspended">Suspended</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Portal Login Account Section */}
-              <div className="rounded-lg border border-zinc-300 bg-zinc-50 p-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    name="create_user_account"
-                    id="create_user_account"
-                    className="rounded text-black focus:ring-indigo-500"
-                  />
-                  <label
-                    htmlFor="create_user_account"
-                    className="text-xs font-semibold text-zinc-900"
-                  >
-                    Create Portal Login Account for Employee
-                  </label>
-                </div>
-                <p className="mt-1 text-[11px] text-zinc-500">
-                  Enables employee self-service login for viewing payslips, punching attendance, and leave requests.
-                </p>
-                <div className="mt-2">
-                  <input
-                    name="user_password"
-                    type="password"
-                    placeholder="Account password (min 8 characters)"
-                    className="w-full rounded-lg border border-zinc-300 p-2 text-xs"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-end gap-3 border-t border-zinc-200 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="rounded-lg border border-zinc-300 px-4 py-2 text-xs font-medium text-zinc-800"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={createEmployeeMutation.isPending}
-                  className="rounded-lg bg-black text-white hover:bg-zinc-800 px-4 py-2 text-xs font-medium hover:bg-black disabled:opacity-50"
-                >
-                  {createEmployeeMutation.isPending ? 'Saving...' : 'Create Employee'}
-                </button>
-              </div>
-            </form>
+            <EmployeeForm
+              isModal={true}
+              onSuccess={() => setIsAddModalOpen(false)}
+              onCancel={() => setIsAddModalOpen(false)}
+            />
           </div>
         </div>
       )}
