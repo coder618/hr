@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Modules\Core\Traits\BelongsToOrganization;
+use Modules\Core\Traits\LogsTenantActivity;
 use Modules\Media\Traits\HasMedia;
 
 class Employee extends Model
 {
-    use HasFactory, BelongsToOrganization, HasMedia;
+    use HasFactory, BelongsToOrganization, HasMedia, LogsTenantActivity;
 
     protected $fillable = [
         'uuid',
@@ -80,6 +81,21 @@ class Employee extends Model
     public function getFullNameAttribute(): string
     {
         return trim("{$this->first_name} {$this->last_name}");
+    }
+
+    public function getActivityLogLabel(): string
+    {
+        $name = $this->full_name ?: trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));
+        $code = $this->employee_code ?? '';
+        return $code ? "{$name} ({$code})" : ($name ?: "ID #{$this->id}");
+    }
+
+    public function tapTenantActivityProperties(array $properties, string $eventName): array
+    {
+        $properties['employee_id'] = $this->id;
+        $properties['employee_code'] = $this->employee_code;
+        $properties['employee_name'] = $this->full_name;
+        return $properties;
     }
 
     public function user(): BelongsTo

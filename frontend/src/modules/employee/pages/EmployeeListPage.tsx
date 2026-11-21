@@ -16,6 +16,7 @@ import {
   FileSpreadsheet,
   Loader2,
   X,
+  Edit,
 } from 'lucide-react';
 import { formatDate } from '@/lib/dateUtils';
 
@@ -354,12 +355,24 @@ export const EmployeeListPage: React.FC = () => {
                       {formatDate(emp.joining_date)}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <Link
-                        to={`/employees/${emp.id}`}
-                        className="rounded bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-800 hover:bg-slate-200"
-                      >
-                        View Profile
-                      </Link>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Link
+                          to={`/employees/${emp.id}`}
+                          className="rounded bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-800 hover:bg-zinc-200 transition-colors"
+                        >
+                          View Profile
+                        </Link>
+                        {canManage && (
+                          <Link
+                            to={`/employees/${emp.id}/edit`}
+                            className="inline-flex items-center gap-1 rounded border border-zinc-300 bg-white hover:bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-zinc-900 shadow-2xs transition-colors"
+                            title="Edit Employee"
+                          >
+                            <Edit className="h-3 w-3 text-zinc-700" />
+                            <span>Edit</span>
+                          </Link>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -28,6 +28,7 @@ import {
   CheckSquare,
   MapPin,
   FolderKanban,
+  Edit,
 } from 'lucide-react';
 import { formatDate, formatTime } from '@/lib/dateUtils';
 
@@ -181,13 +182,22 @@ export const EmployeeDetailsPage: React.FC = () => {
             </div>
           )}
           {canManage && (
-            <button
-              onClick={() => setIsMediaPickerOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-black text-white hover:bg-zinc-800 px-3.5 py-2 text-xs font-medium shadow-2xs transition-colors cursor-pointer"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Attach File</span>
-            </button>
+            <>
+              <Link
+                to={`/employees/${employee.id}/edit`}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 bg-white hover:bg-zinc-50 px-3.5 py-2 text-xs font-semibold text-zinc-900 shadow-2xs transition-colors"
+              >
+                <Edit className="h-4 w-4 text-zinc-700" />
+                <span>Edit Profile</span>
+              </Link>
+              <button
+                onClick={() => setIsMediaPickerOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-black text-white hover:bg-zinc-800 px-3.5 py-2 text-xs font-medium shadow-2xs transition-colors cursor-pointer"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Attach File</span>
+              </button>
+            </>
           )}
         </div>
       </div>

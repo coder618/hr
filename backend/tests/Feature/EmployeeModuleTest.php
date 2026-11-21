@@ -469,4 +469,52 @@ class EmployeeModuleTest extends TestCase
         $activeIds = $service->getActiveEmployeeIds($this->orgA->id);
         $this->assertContains($employee->id, $activeIds);
     }
+
+    public function test_updating_employee_records_audit_log(): void
+    {
+        $branch = Branch::create([
+            'organization_id' => $this->orgA->id,
+            'name' => 'HQ Branch',
+            'code' => 'HQ-01',
+        ]);
+
+        $employee = Employee::create([
+            'organization_id' => $this->orgA->id,
+            'first_name' => 'Original',
+            'last_name' => 'Name',
+            'email' => 'original@acme.com',
+            'employee_code' => 'EMP-AUD01',
+            'branch_id' => $branch->id,
+            'status' => 'active',
+            'joining_date' => '2026-01-01',
+        ]);
+
+        // Update employee name via API
+        $response = $this->withHeader('Authorization', 'Bearer ' . $this->tokenA)
+            ->putJson("/api/v1/employees/{$employee->id}", [
+                'first_name' => 'Modified',
+                'last_name' => 'Name',
+                'email' => 'original@acme.com',
+                'employee_code' => 'EMP-AUD01',
+                'branch_id' => $branch->id,
+                'joining_date' => '2026-01-01',
+            ]);
+
+        $response->assertStatus(200);
+
+        // Verify audit log exists
+        $auditRes = $this->withHeader('Authorization', 'Bearer ' . $this->tokenA)
+            ->getJson('/api/v1/audit-logs');
+
+        $auditRes->assertStatus(200);
+        $logs = $auditRes->json('data');
+
+        $this->assertNotEmpty($logs);
+        $latestLog = collect($logs)->first(fn($l) => ($l['properties']['employee_id'] ?? null) == $employee->id && ($l['event'] ?? null) === 'updated');
+        $this->assertNotNull($latestLog);
+        $this->assertEquals('employee', $latestLog['log_name']);
+        $this->assertStringContainsString('Modified Name', $latestLog['description']);
+        $this->assertEquals('Original', $latestLog['properties']['old']['first_name']);
+        $this->assertEquals('Modified', $latestLog['properties']['attributes']['first_name']);
+    }
 }

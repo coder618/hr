@@ -316,15 +316,101 @@ class EmployeeController extends Controller
             'joining_date' => 'sometimes|required|date',
             'employment_type' => 'nullable|string|in:full_time,part_time,contract,intern',
             'status' => 'nullable|string|in:active,probation,suspended,terminated,resigned',
-            'emergency_contact' => 'nullable|array',
-            'address' => 'nullable|array',
-            'bank_details' => 'nullable|array',
+            'emergency_contact' => 'nullable',
+            'address' => 'nullable',
+            'bank_details' => 'nullable',
+            'avatar' => 'nullable|file|image|max:10240',
+            'avatar_media_id' => 'nullable|integer|exists:media,id',
+            'create_user_account' => 'nullable',
+            'user_password' => 'nullable|string|min:8',
         ]);
+
+        foreach (['emergency_contact', 'address', 'bank_details'] as $field) {
+            if (isset($validated[$field]) && is_string($validated[$field])) {
+                $decoded = json_decode($validated[$field], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $validated[$field] = $decoded;
+                }
+            }
+        }
+
+        $createUser = filter_var($validated['create_user_account'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $userPassword = !empty($validated['user_password']) ? $validated['user_password'] : null;
+
+        unset(
+            $validated['avatar'],
+            $validated['avatar_media_id'],
+            $validated['create_user_account'],
+            $validated['user_password']
+        );
+
+        // Optionally create portal user if not already linked
+        if ($createUser && ! $employee->user_id) {
+            $password = $userPassword ?: Str::random(12);
+            $user = User::create([
+                'organization_id' => $tenantId,
+                'name' => trim(($validated['first_name'] ?? $employee->first_name) . ' ' . ($validated['last_name'] ?? $employee->last_name)),
+                'email' => $validated['email'] ?? $employee->email,
+                'phone' => $validated['phone'] ?? $employee->phone,
+                'password' => Hash::make($password),
+                'is_active' => true,
+            ]);
+            $user->assignRole('employee');
+            $validated['user_id'] = $user->id;
+        }
 
         $employee->update($validated);
 
+        // Sync linked portal user name/email/phone
+        if ($employee->user) {
+            $userUpdates = [];
+            if (isset($validated['first_name']) || isset($validated['last_name'])) {
+                $userUpdates['name'] = trim(($validated['first_name'] ?? $employee->first_name) . ' ' . ($validated['last_name'] ?? $employee->last_name));
+            }
+            if (isset($validated['email'])) {
+                $userUpdates['email'] = $validated['email'];
+            }
+            if (isset($validated['phone'])) {
+                $userUpdates['phone'] = $validated['phone'];
+            }
+            if (!empty($userUpdates)) {
+                $employee->user->update($userUpdates);
+            }
+        }
+
+        // Handle avatar upload / change
+        $avatarMediaId = null;
+        if ($request->hasFile('avatar')) {
+            $avatarMedia = $this->mediaService->uploadFile($request->file('avatar'), null, $request->user()?->id);
+            $avatarMediaId = $avatarMedia->id;
+        } elseif ($request->filled('avatar_media_id')) {
+            $avatarMediaId = (int) $request->input('avatar_media_id');
+        }
+
+        if ($avatarMediaId) {
+            $employee->attachMedia($avatarMediaId, 'avatar');
+            if ($employee->user) {
+                $mediaRecord = Media::find($avatarMediaId);
+                if ($mediaRecord) {
+                    $employee->user->update(['avatar' => $mediaRecord->getUrl()]);
+                }
+            }
+
+            activity('employee')
+                ->event('updated')
+                ->causedBy($request->user())
+                ->performedOn($employee)
+                ->withProperties([
+                    'organization_id' => $employee->organization_id,
+                    'employee_id' => $employee->id,
+                    'employee_name' => $employee->full_name,
+                    'avatar_media_id' => $avatarMediaId,
+                ])
+                ->log("Updated avatar for employee {$employee->full_name} ({$employee->employee_code})");
+        }
+
         return $this->successResponse(
-            $employee->load(['branch', 'department', 'designation', 'reportingManager']),
+            $employee->fresh()->load(['branch', 'department', 'designation', 'reportingManager', 'user']),
             'Employee updated successfully.'
         );
     }
@@ -358,6 +444,20 @@ class EmployeeController extends Controller
 
         $employee->attachMedia($media->id, $validated['collection_name'] ?? 'documents');
 
+        activity('employee')
+            ->event('updated')
+            ->causedBy($request->user())
+            ->performedOn($employee)
+            ->withProperties([
+                'organization_id' => $employee->organization_id,
+                'employee_id' => $employee->id,
+                'employee_name' => $employee->full_name,
+                'media_id' => $media->id,
+                'collection' => $validated['collection_name'] ?? 'documents',
+                'title' => $media->title ?? $media->file_name,
+            ])
+            ->log("Attached document '{$media->file_name}' to employee {$employee->full_name} ({$employee->employee_code})");
+
         return $this->successResponse(
             $employee->load('media'),
             'Document attached to employee successfully.'
@@ -372,6 +472,19 @@ class EmployeeController extends Controller
         $employee = Employee::findOrFail($id);
         $collection = $request->query('collection_name', 'documents');
         $employee->detachMedia($mediaId, $collection);
+
+        activity('employee')
+            ->event('updated')
+            ->causedBy($request->user())
+            ->performedOn($employee)
+            ->withProperties([
+                'organization_id' => $employee->organization_id,
+                'employee_id' => $employee->id,
+                'employee_name' => $employee->full_name,
+                'media_id' => $mediaId,
+                'collection' => $collection,
+            ])
+            ->log("Detached document #{$mediaId} from employee {$employee->full_name} ({$employee->employee_code})");
 
         return $this->successResponse(
             $employee->load('media'),

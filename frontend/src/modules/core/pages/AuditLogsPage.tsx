@@ -108,20 +108,22 @@ export const AuditLogsPage: React.FC = () => {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search action..."
-            className="w-full bg-white border border-zinc-300 rounded-lg pl-9 pr-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-black focus:ring-1 focus:ring-black text-xs"
+            placeholder="Search action, actor, email..."
+            className="w-full bg-white border border-zinc-300 rounded-lg pl-9 pr-3 py-2 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-black focus:ring-1 focus:ring-black text-xs"
           />
         </form>
 
         <select
           value={eventFilter}
           onChange={(e) => setEventFilter(e.target.value)}
-          className="bg-white border border-zinc-300 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+          className="bg-white border border-zinc-300 rounded-lg px-3 py-2 text-xs text-zinc-800 focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
         >
           <option value="">All Categories</option>
           <option value="created">Created</option>
           <option value="updated">Updated</option>
           <option value="deleted">Deleted</option>
+          <option value="employee">Employee</option>
+          <option value="user">User</option>
           <option value="security">Security</option>
           <option value="tenant_settings">Settings</option>
         </select>
@@ -132,7 +134,7 @@ export const AuditLogsPage: React.FC = () => {
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="w-full bg-white border border-zinc-300 rounded-lg pl-9 pr-3 py-2 text-white text-xs focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+            className="w-full bg-white border border-zinc-300 rounded-lg pl-9 pr-3 py-2 text-zinc-800 text-xs focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
             title="Start Date"
           />
         </div>
@@ -143,7 +145,7 @@ export const AuditLogsPage: React.FC = () => {
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="w-full bg-white border border-zinc-300 rounded-lg pl-9 pr-3 py-2 text-white text-xs focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+            className="w-full bg-white border border-zinc-300 rounded-lg pl-9 pr-3 py-2 text-zinc-800 text-xs focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
             title="End Date"
           />
         </div>
@@ -186,17 +188,17 @@ export const AuditLogsPage: React.FC = () => {
                       <div className="text-xs text-zinc-500">{log.causer?.email || 'CLI / Cron'}</div>
                     </td>
                     <td className="px-5 py-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-700 text-indigo-300 font-mono">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 text-zinc-800 border border-zinc-200 font-mono capitalize">
                         {log.log_name || log.event || 'activity'}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-xs text-zinc-600 max-w-md truncate">
+                    <td className="px-5 py-3 text-xs text-zinc-800 max-w-md truncate">
                       {log.description}
                     </td>
                     <td className="px-5 py-3 text-right">
                       <button
                         onClick={() => setSelectedLog(log)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-indigo-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded border border-zinc-300 transition"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-zinc-700 hover:text-black bg-white hover:bg-zinc-100 rounded border border-zinc-300 shadow-xs transition"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         Inspect
@@ -212,7 +214,7 @@ export const AuditLogsPage: React.FC = () => {
 
       {/* Inspect Modal */}
       {selectedLog && (
-        <div className="fixed inset-0 z-50 bg-white/40 backdrop-blur-xs backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white border border-zinc-300 rounded-xl w-full max-w-lg p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-zinc-300 pb-3">
               <h3 className="text-base font-semibold text-zinc-950 flex items-center gap-2">
@@ -221,39 +223,39 @@ export const AuditLogsPage: React.FC = () => {
               </h3>
               <button
                 onClick={() => setSelectedLog(null)}
-                className="text-zinc-500 hover:text-white transition"
+                className="text-zinc-500 hover:text-zinc-900 transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-2 text-xs">
-              <div className="flex justify-between py-1 border-b border-zinc-300">
+              <div className="flex justify-between py-1 border-b border-zinc-200">
                 <span className="text-zinc-500">Timestamp:</span>
                 <span className="text-zinc-950 font-mono">{formatDateTime(selectedLog.created_at)}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-zinc-300">
+              <div className="flex justify-between py-1 border-b border-zinc-200">
                 <span className="text-zinc-500">Actor:</span>
-                <span className="text-zinc-950">{selectedLog.causer?.name || 'System'}</span>
+                <span className="text-zinc-950 font-medium">{selectedLog.causer?.name || 'System'}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-zinc-300">
+              <div className="flex justify-between py-1 border-b border-zinc-200">
                 <span className="text-zinc-500">Action:</span>
-                <span className="text-indigo-300 font-mono">{selectedLog.description}</span>
+                <span className="text-zinc-900 font-mono">{selectedLog.description}</span>
               </div>
             </div>
 
             <div>
-              <div className="text-xs font-medium text-zinc-500 mb-1">Payload Properties:</div>
-              <pre className="bg-white p-3 rounded-lg border border-zinc-300 text-zinc-900 font-mono text-xs overflow-x-auto max-h-48">
+              <div className="text-xs font-medium text-zinc-600 mb-1">Payload Properties:</div>
+              <pre className="bg-zinc-50 p-3 rounded-lg border border-zinc-200 text-zinc-900 font-mono text-xs overflow-x-auto max-h-56">
                 {JSON.stringify(selectedLog.properties || {}, null, 2)}
               </pre>
             </div>
 
-            <div className="flex justify-end pt-2 border-t border-zinc-300">
+            <div className="flex justify-end pt-2 border-t border-zinc-200">
               <button
                 type="button"
                 onClick={() => setSelectedLog(null)}
-                className="px-4 py-1.5 bg-slate-800 text-zinc-600 rounded text-xs"
+                className="px-4 py-1.5 bg-black text-white hover:bg-zinc-800 rounded text-xs font-medium transition"
               >
                 Close
               </button>

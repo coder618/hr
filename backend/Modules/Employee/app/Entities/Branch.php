@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Core\Traits\BelongsToOrganization;
+use Modules\Core\Traits\LogsTenantActivity;
 
 class Branch extends Model
 {
-    use HasFactory, BelongsToOrganization;
+    use HasFactory, BelongsToOrganization, LogsTenantActivity;
 
     protected $fillable = [
         'organization_id',

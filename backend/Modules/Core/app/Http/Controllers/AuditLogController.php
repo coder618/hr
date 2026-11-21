@@ -106,6 +106,7 @@ class AuditLogController extends Controller
         if ($tenantId) {
             $query->where(function ($q) use ($tenantId) {
                 $q->where('properties->organization_id', $tenantId)
+                  ->orWhere('properties->organization_id', (string) $tenantId)
                   ->orWhereHas('causer', function ($cq) use ($tenantId) {
                       $cq->where('organization_id', $tenantId);
                   });
@@ -119,14 +120,23 @@ class AuditLogController extends Controller
         }
 
         if ($request->filled('event')) {
-            $query->where('event', $request->input('event'));
+            $event = $request->input('event');
+            $query->where(function ($q) use ($event) {
+                $q->where('event', $event)
+                  ->orWhere('log_name', $event);
+            });
         }
 
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('description', 'like', "%{$search}%")
-                  ->orWhere('log_name', 'like', "%{$search}%");
+                  ->orWhere('log_name', 'like', "%{$search}%")
+                  ->orWhere('event', 'like', "%{$search}%")
+                  ->orWhereHas('causer', function ($cq) use ($search) {
+                      $cq->where('name', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%");
+                  });
             });
         }
 

@@ -17,6 +17,11 @@ export const employeeModuleConfig: ModuleConfig = {
       role: 'admin,hr',
     },
     {
+      path: '/employees/:id/edit',
+      component: lazy(() => import('./pages/EditEmployeePage')),
+      role: 'admin,hr',
+    },
+    {
       path: '/employees/:id',
       component: lazy(() => import('./pages/EmployeeDetailsPage')),
     },

@@ -49,6 +49,14 @@ class AuthController extends Controller
         $user = $query->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
+            activity('security')
+                ->event('failed_login')
+                ->withProperties([
+                    'email' => $request->email,
+                    'ip' => $request->ip(),
+                ])
+                ->log("Failed login attempt for {$request->email}");
+
             return $this->errorResponse('Invalid credentials provided.', ['email' => 'These credentials do not match our records.'], 422);
         }
 
@@ -65,6 +73,16 @@ class AuthController extends Controller
         }
 
         $user->update(['last_login_at' => now()]);
+
+        activity('security')
+            ->event('login')
+            ->causedBy($user)
+            ->withProperties([
+                'organization_id' => $user->organization_id,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ])
+            ->log("User {$user->name} ({$user->email}) logged in");
 
         // Create Sanctum Token
         $token = $user->createToken('auth-token')->plainTextToken;
@@ -171,7 +189,19 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
+        if ($user) {
+            activity('security')
+                ->event('logout')
+                ->causedBy($user)
+                ->withProperties([
+                    'organization_id' => $user->organization_id,
+                    'ip' => $request->ip(),
+                ])
+                ->log("User {$user->name} ({$user->email}) logged out");
+
+            $user->currentAccessToken()?->delete();
+        }
 
         return $this->successResponse(null, 'Successfully logged out.');
     }
@@ -211,6 +241,15 @@ class AuthController extends Controller
         }
 
         $user->update(['password' => Hash::make($request->password)]);
+
+        activity('security')
+            ->event('password_change')
+            ->causedBy($user)
+            ->withProperties([
+                'organization_id' => $user->organization_id,
+                'ip' => $request->ip(),
+            ])
+            ->log("User {$user->name} ({$user->email}) changed their password");
 
         return $this->successResponse(null, 'Password changed successfully.');
     }
