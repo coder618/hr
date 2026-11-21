@@ -196,7 +196,7 @@
     </div>
 
     <div class="footer">
-        This is a system-generated document and requires no physical signature. Generated on {{ date('Y-m-d H:i:s') }}.
+        This is a system-generated document and requires no physical signature. Generated on {{ date('d-m-Y H:i') }}.
     </div>
 </body>
 </html>

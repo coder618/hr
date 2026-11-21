@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { formatDate, formatTime } from '@/lib/dateUtils';
 import { TodayAttendanceResponse } from '../types/attendance';
 import {
   CheckCircle,
@@ -137,12 +138,7 @@ export const AttendancePunchPage: React.FC = () => {
               {currentTime.toLocaleTimeString()}
             </div>
             <p className="mt-1 text-xs text-zinc-500">
-              {currentTime.toLocaleDateString(undefined, {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })}
+              {formatDate(currentTime)}
             </p>
 
             {/* Geofence Status Badge */}
@@ -250,14 +246,14 @@ export const AttendancePunchPage: React.FC = () => {
             <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
               <div className="rounded-lg bg-zinc-50 p-2.5">
                 <span className="text-zinc-500">First Clock In</span>
-                <p className="mt-0.5 font-semibold text-zinc-950">
-                  {record?.clock_in ? new Date(record.clock_in).toLocaleTimeString() : '—'}
+                <p className="mt-0.5 font-semibold text-zinc-950 font-mono">
+                  {formatTime(record?.clock_in)}
                 </p>
               </div>
               <div className="rounded-lg bg-zinc-50 p-2.5">
                 <span className="text-zinc-500">Last Clock Out</span>
-                <p className="mt-0.5 font-semibold text-zinc-950">
-                  {record?.clock_out ? new Date(record.clock_out).toLocaleTimeString() : '—'}
+                <p className="mt-0.5 font-semibold text-zinc-950 font-mono">
+                  {formatTime(record?.clock_out)}
                 </p>
               </div>
               <div className="rounded-lg bg-zinc-50 p-2.5">
@@ -298,7 +294,7 @@ export const AttendancePunchPage: React.FC = () => {
                           {p.punch_type}
                         </span>
                         <span className="font-mono text-zinc-800">
-                          {new Date(p.punch_time).toLocaleTimeString()}
+                          {formatTime(p.punch_time)}
                         </span>
                       </div>
 

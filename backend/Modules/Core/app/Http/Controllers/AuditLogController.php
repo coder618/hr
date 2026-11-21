@@ -78,7 +78,7 @@ class AuditLogController extends Controller
 
             foreach ($query->cursor() as $log) {
                 fputcsv($handle, [
-                    $log->created_at ? Carbon::parse($log->created_at)->format('Y-m-d H:i:s') : '',
+                    $log->created_at ? Carbon::parse($log->created_at)->format('d-m-Y H:i') : '',
                     $log->causer?->name ?? 'System',
                     $log->causer?->email ?? '',
                     $log->event ?? '',

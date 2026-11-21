@@ -17,23 +17,7 @@ import {
   Loader2,
   X,
 } from 'lucide-react';
-
-const formatJoinDate = (dateStr?: string | null) => {
-  if (!dateStr) return '—';
-  const match = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
-  if (match) {
-    const [, year, month, day, hours = '00', minutes = '00'] = match;
-    return `${day}-${month}-${year} ${hours}:${minutes}`;
-  }
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return String(dateStr);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  return `${day}-${month}-${year} ${hours}:${minutes}`;
-};
+import { formatDate } from '@/lib/dateUtils';
 
 export const EmployeeListPage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -367,7 +351,7 @@ export const EmployeeListPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 font-mono text-[11px] text-zinc-600">
-                      {formatJoinDate(emp.joining_date)}
+                      {formatDate(emp.joining_date)}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link

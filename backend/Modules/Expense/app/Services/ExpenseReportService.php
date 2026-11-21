@@ -81,7 +81,7 @@ class ExpenseReportService
 
                 fputcsv($handle, [
                     $claim->claim_number,
-                    $claim->claim_date ? Carbon::parse($claim->claim_date)->format('Y-m-d') : '',
+                    $claim->claim_date ? Carbon::parse($claim->claim_date)->format('d-m-Y') : '',
                     $employee?->employee_code ?? '',
                     $empName,
                     $deptName,
@@ -92,8 +92,8 @@ class ExpenseReportService
                     number_format((float) $claim->amount, 2, '.', ''),
                     $claim->currency,
                     $claim->status,
-                    $claim->approved_at ? Carbon::parse($claim->approved_at)->format('Y-m-d H:i:s') : '',
-                    $claim->reimbursed_at ? Carbon::parse($claim->reimbursed_at)->format('Y-m-d H:i:s') : '',
+                    $claim->approved_at ? Carbon::parse($claim->approved_at)->format('d-m-Y H:i') : '',
+                    $claim->reimbursed_at ? Carbon::parse($claim->reimbursed_at)->format('d-m-Y H:i') : '',
                     $claim->payment_reference ?? '',
                     $claim->description,
                 ]);

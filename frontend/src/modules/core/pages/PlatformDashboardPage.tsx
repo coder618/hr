@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Building, Users, Server, HardDrive, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
 import api from '@/lib/api';
+import { formatDateTime } from '@/lib/dateUtils';
 
 export const PlatformDashboardPage: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
@@ -82,7 +83,7 @@ export const PlatformDashboardPage: React.FC = () => {
             )}
           </div>
           <p className="text-xs text-zinc-500 mt-2 truncate">
-            Last beat: {stats?.last_heartbeat ? new Date(stats.last_heartbeat).toLocaleTimeString() : 'None recorded'}
+            Last beat: {stats?.last_heartbeat ? formatDateTime(stats.last_heartbeat) : 'None recorded'}
           </p>
         </div>
 

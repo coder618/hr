@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { formatDate, formatTime } from '@/lib/dateUtils';
 import { AttendanceRecord, AttendanceSummaryResponse } from '../types/attendance';
 import { Branch, Department } from '../../employee/types/employee';
 import { useAuthStore } from '@/stores/authStore';
@@ -351,7 +352,7 @@ export const AttendanceRecordsPage: React.FC = () => {
                 {records.map((r) => (
                   <tr key={r.id} className="hover:bg-zinc-50/50">
                     <td className="px-4 py-3 font-medium text-zinc-950">
-                      {r.date}
+                      {formatDate(r.date)}
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-semibold text-zinc-950">
@@ -362,7 +363,7 @@ export const AttendanceRecordsPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 font-mono">
-                      {r.clock_in ? new Date(r.clock_in).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                      {formatTime(r.clock_in)}
                       {r.is_late && (
                         <span className="ml-1.5 rounded bg-zinc-100 px-1 py-0.2 text-[9px] font-bold text-zinc-900">
                           +{r.late_minutes}m
@@ -370,7 +371,7 @@ export const AttendanceRecordsPage: React.FC = () => {
                       )}
                     </td>
                     <td className="px-4 py-3 font-mono">
-                      {r.clock_out ? new Date(r.clock_out).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                      {formatTime(r.clock_out)}
                     </td>
                     <td className="px-4 py-3 font-medium text-zinc-950">
                       {(r.work_minutes / 60).toFixed(1)} hrs
@@ -482,7 +483,7 @@ export const AttendanceRecordsPage: React.FC = () => {
               Request Attendance Regularization
             </h3>
             <p className="text-xs text-zinc-500">
-              Date: <span className="font-semibold text-zinc-800">{selectedRecord.date}</span>
+              Date: <span className="font-semibold text-zinc-800">{formatDate(selectedRecord.date)}</span>
             </p>
 
             <form

@@ -116,14 +116,14 @@ class AttendanceReportController extends Controller
                 ->lazy(100)
                 ->each(function ($r) use ($handle) {
                     fputcsv($handle, [
-                        $r->date ? $r->date->format('Y-m-d') : '',
+                        $r->date ? $r->date->format('d-m-Y') : '',
                         $r->employee?->employee_code,
                         $r->employee?->full_name,
                         $r->employee?->branch?->name ?? '',
                         $r->employee?->department?->name ?? '',
                         $r->shift?->name ?? '',
-                        $r->clock_in ? $r->clock_in->format('H:i:s') : '',
-                        $r->clock_out ? $r->clock_out->format('H:i:s') : '',
+                        $r->clock_in ? $r->clock_in->format('H:i') : '',
+                        $r->clock_out ? $r->clock_out->format('H:i') : '',
                         round($r->work_minutes / 60, 2),
                         $r->break_minutes,
                         round($r->overtime_minutes / 60, 2),

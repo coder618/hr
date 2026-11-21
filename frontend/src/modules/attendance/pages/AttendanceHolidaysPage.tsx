@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { formatDate } from '@/lib/dateUtils';
 import {
   Calendar,
   Plus,
@@ -275,7 +276,7 @@ export const AttendanceHolidaysPage: React.FC = () => {
               {nextHoliday ? nextHoliday.name : 'None'}
             </h3>
             <p className="text-xs text-zinc-500 mt-0.5">
-              {nextHoliday ? `${nextHoliday.from_date}` : 'No upcoming holidays'}
+              {nextHoliday ? formatDate(nextHoliday.from_date) : 'No upcoming holidays'}
             </p>
           </div>
           <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
@@ -418,10 +419,10 @@ export const AttendanceHolidaysPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-zinc-600 font-medium">
                         {holiday.from_date === holiday.to_date ? (
-                          holiday.from_date
+                          formatDate(holiday.from_date)
                         ) : (
                           <span>
-                            {holiday.from_date} <span className="text-zinc-400">to</span> {holiday.to_date}
+                            {formatDate(holiday.from_date)} <span className="text-zinc-400">to</span> {formatDate(holiday.to_date)}
                           </span>
                         )}
                       </td>

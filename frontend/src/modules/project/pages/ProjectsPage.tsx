@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { usePermission } from '@/hooks/usePermission';
 import api from '@/lib/api';
+import { formatDate } from '@/lib/dateUtils';
 import { Project } from '../types/project';
 import { Employee } from '../../employee/types/employee';
 import {
@@ -336,7 +337,7 @@ export const ProjectsPage: React.FC = () => {
                   {p.due_date && (
                     <div className="flex items-center gap-1 shrink-0">
                       <Calendar className="w-3.5 h-3.5 text-zinc-500" />
-                      <span>Due {p.due_date}</span>
+                      <span>Due {formatDate(p.due_date)}</span>
                     </div>
                   )}
                 </div>

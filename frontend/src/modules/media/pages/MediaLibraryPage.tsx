@@ -16,6 +16,7 @@ import {
   X,
 } from 'lucide-react';
 import api from '@/lib/api';
+import { formatDateTime } from '@/lib/dateUtils';
 import { MediaFolderItem, MediaItem, UploadProgress } from '../types/media';
 
 export const MediaLibraryPage: React.FC = () => {
@@ -486,8 +487,8 @@ export const MediaLibraryPage: React.FC = () => {
                       <td className="px-4 py-3 font-mono">{item.extension.toUpperCase()}</td>
                       <td className="px-4 py-3 font-mono">{formatBytes(item.file_size)}</td>
                       <td className="px-4 py-3">{item.uploader?.name || 'System'}</td>
-                      <td className="px-4 py-3 text-zinc-500">
-                        {new Date(item.created_at).toLocaleDateString()}
+                      <td className="px-4 py-3 text-zinc-500 font-mono text-xs whitespace-nowrap">
+                        {formatDateTime(item.created_at)}
                       </td>
                       <td className="px-4 py-3 text-right space-x-2">
                         <a

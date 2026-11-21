@@ -87,7 +87,7 @@ class OrganizationController extends Controller
                 'settings' => [
                     'timezone' => 'UTC',
                     'currency' => 'USD',
-                    'date_format' => 'Y-m-d',
+                    'date_format' => 'd-m-Y',
                 ],
             ]);
 

@@ -42,6 +42,7 @@ import {
 } from 'recharts';
 import { useAuthStore } from '@/stores/authStore';
 import api from '@/lib/api';
+import { formatDate, formatTime } from '@/lib/dateUtils';
 
 // Custom dark styled tooltip for Recharts
 const CustomChartTooltip: React.FC<any> = ({ active, payload, label, unit = '' }) => {
@@ -114,8 +115,8 @@ export const TenantDashboardPage: React.FC = () => {
               {organization?.name || 'Workspace'}
             </span>
             <span className="text-xs text-zinc-400">•</span>
-            <span className="text-xs text-zinc-500">
-              {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
+            <span className="text-xs text-zinc-500 font-mono">
+              {formatDate(new Date())}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-950 tracking-tight">
@@ -777,11 +778,11 @@ const AdminDashboardSection: React.FC<AdminDashboardSectionProps> = ({
                         </span>
                       )}
                       <span className="font-mono font-bold text-zinc-900">
-                        {rec.clock_in || '—'}
+                        {formatTime(rec.clock_in)}
                       </span>
                     </div>
                     <span className="text-[10px] text-zinc-400 font-mono">
-                      {rec.clock_out ? `Out: ${rec.clock_out}` : 'Currently inside'}
+                      {rec.clock_out ? `Out: ${formatTime(rec.clock_out)}` : 'Currently inside'}
                     </span>
                   </div>
                 </div>
@@ -821,7 +822,7 @@ const AdminDashboardSection: React.FC<AdminDashboardSectionProps> = ({
                     </div>
                     <p className="text-[11px] text-zinc-600 line-clamp-2">{n.content}</p>
                     <div className="pt-1 text-[10px] text-zinc-400 font-mono">
-                      {new Date(n.published_at).toLocaleDateString()}
+                      {formatDate(n.published_at)}
                     </div>
                   </div>
                 ))}
@@ -935,7 +936,7 @@ const EmployeeDashboardSection: React.FC<EmployeeDashboardSectionProps> = ({
               </span>
             </div>
             <p className="text-xs text-zinc-500 mt-1.5 font-mono">
-              {attendance?.punch_in_time ? `Punched in at ${attendance.punch_in_time}` : 'No punch recorded yet today'}
+              {attendance?.punch_in_time ? `Punched in at ${formatTime(attendance.punch_in_time)}` : 'No punch recorded yet today'}
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px]">
@@ -1296,7 +1297,7 @@ const EmployeeDashboardSection: React.FC<EmployeeDashboardSectionProps> = ({
                   </div>
                   <p className="text-[11px] text-zinc-600 line-clamp-2">{n.content}</p>
                   <div className="pt-1 text-[10px] text-zinc-400 font-mono">
-                    {new Date(n.published_at).toLocaleDateString()}
+                    {formatDate(n.published_at)}
                   </div>
                 </div>
               ))}
@@ -1327,7 +1328,7 @@ const EmployeeDashboardSection: React.FC<EmployeeDashboardSectionProps> = ({
                   <div>
                     <p className="font-semibold text-zinc-950">{h.name}</p>
                     <span className="text-[11px] text-zinc-500 font-mono mt-0.5">
-                      {h.start_date} {h.end_date && h.end_date !== h.start_date ? `to ${h.end_date}` : ''}
+                      {formatDate(h.start_date)} {h.end_date && h.end_date !== h.start_date ? `to ${formatDate(h.end_date)}` : ''}
                     </span>
                   </div>
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-zinc-200 text-zinc-800">

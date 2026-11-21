@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { formatDate } from '@/lib/dateUtils';
 import { Task } from '../types/project';
 import {
   Box,
@@ -127,7 +128,7 @@ export const MyTasksPage: React.FC = () => {
                   <td className="px-6 py-4 text-xs">
                     {t.due_date ? (
                       <span className="flex items-center gap-1 text-zinc-800">
-                        <Calendar className="w-3.5 h-3.5 text-zinc-500" /> {t.due_date}
+                        <Calendar className="w-3.5 h-3.5 text-zinc-500" /> {formatDate(t.due_date)}
                       </span>
                     ) : (
                       <span className="text-zinc-500 italic">No deadline</span>

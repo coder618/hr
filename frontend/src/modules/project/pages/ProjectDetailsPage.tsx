@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usePermission } from '@/hooks/usePermission';
 import api from '@/lib/api';
+import { formatDate } from '@/lib/dateUtils';
 import { Project, Task, ChecklistItem } from '../types/project';
 import { Employee } from '../../employee/types/employee';
 import {
@@ -387,7 +388,7 @@ export const ProjectDetailsPage: React.FC = () => {
           <div>
             <span className="text-[11px] font-semibold uppercase text-zinc-500">Timeline</span>
             <div className="font-semibold text-zinc-900 text-sm">
-              {project.start_date || 'N/A'} → {project.due_date || 'N/A'}
+              {project.start_date ? formatDate(project.start_date) : 'N/A'} → {project.due_date ? formatDate(project.due_date) : 'N/A'}
             </div>
           </div>
           <div>
@@ -540,7 +541,7 @@ export const ProjectDetailsPage: React.FC = () => {
                 <tr key={m.id} className="hover:bg-zinc-50/50">
                   <td className="px-6 py-4 font-bold text-zinc-950">{m.title}</td>
                   <td className="px-6 py-4 text-xs">{m.description || 'No description'}</td>
-                  <td className="px-6 py-4 font-medium">{m.due_date || 'Flexible'}</td>
+                  <td className="px-6 py-4 font-medium">{m.due_date ? formatDate(m.due_date) : 'Flexible'}</td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() =>
@@ -621,7 +622,7 @@ export const ProjectDetailsPage: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-zinc-500">Due Date:</span>
-                  <div className="font-semibold text-zinc-900">{selectedTask.due_date || 'No due date'}</div>
+                  <div className="font-semibold text-zinc-900">{selectedTask.due_date ? formatDate(selectedTask.due_date) : 'No due date'}</div>
                 </div>
               </div>
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { formatDateTime } from '@/lib/dateUtils';
 import { AttendanceDevice } from '../types/attendance';
 import { Branch } from '../../employee/types/employee';
 import {
@@ -188,7 +189,7 @@ export const AttendanceDevicesPage: React.FC = () => {
                       <span className="text-zinc-500">Last Seen:</span>
                       <span>
                         {device.last_heartbeat_at
-                          ? new Date(device.last_heartbeat_at).toLocaleString()
+                          ? formatDateTime(device.last_heartbeat_at)
                           : 'Never'}
                       </span>
                     </div>

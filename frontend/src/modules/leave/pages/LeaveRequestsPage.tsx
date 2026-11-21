@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { formatDate } from '@/lib/dateUtils';
 import { LeaveRequest, LeaveType, LeaveBalance } from '../types/leave';
 import {
   Plus,
@@ -268,7 +269,7 @@ export const LeaveRequestsPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-zinc-950 font-medium">
-                        {r.from_date} {r.from_date !== r.to_date && `→ ${r.to_date}`}
+                        {formatDate(r.from_date)} {r.from_date !== r.to_date && `→ ${formatDate(r.to_date)}`}
                       </div>
                       {r.is_half_day && (
                         <div className="text-xs text-zinc-900 font-medium capitalize">

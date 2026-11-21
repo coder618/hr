@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { formatDate, formatDateTime } from '@/lib/dateUtils';
 import { Notice } from '../types/notice';
 import { Department, Branch } from '../../employee/types/employee';
 import {
@@ -245,7 +246,7 @@ export const NoticeAdminPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs text-zinc-600 font-mono whitespace-nowrap">
-                      {notice.published_at ? new Date(notice.published_at).toLocaleDateString() : '—'}
+                      {notice.published_at ? formatDate(notice.published_at) : '—'}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       {notice.requires_acknowledgment ? (
@@ -561,7 +562,7 @@ export const NoticeAdminPage: React.FC = () => {
                       <div className="text-zinc-500 font-mono text-[11px]">{ack.employee?.employee_code} ({ack.employee?.email})</div>
                     </div>
                     <div className="text-zinc-500 font-mono text-right text-[11px]">
-                      {new Date(ack.acknowledged_at).toLocaleString()}
+                      {formatDateTime(ack.acknowledged_at)}
                     </div>
                   </div>
                 ))}

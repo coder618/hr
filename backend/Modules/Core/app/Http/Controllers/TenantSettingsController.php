@@ -38,7 +38,7 @@ class TenantSettingsController extends Controller
             'favicon_url' => '',
             'timezone' => 'Asia/Dhaka',
             'currency' => 'BDT',
-            'date_format' => 'Y-m-d',
+            'date_format' => 'd-m-Y',
             'time_format' => 'H:i',
             'working_days' => [1, 2, 3, 4, 5], // Mon-Fri
             'address' => '',

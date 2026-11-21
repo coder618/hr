@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { formatDate } from '@/lib/dateUtils';
 import { ExpenseClaim, ExpenseCategory } from '../types/expense';
 import { Employee } from '../../employee/types/employee';
 import { Project } from '../../project/types/project';
@@ -275,7 +276,7 @@ export const ExpenseClaimsPage: React.FC = () => {
                       {claim.claim_number}
                     </td>
                     <td className="px-4 py-3 text-zinc-600 font-mono text-xs whitespace-nowrap">
-                      {claim.claim_date}
+                      {formatDate(claim.claim_date)}
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-semibold text-zinc-950 text-xs">

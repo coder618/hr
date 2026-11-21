@@ -9,6 +9,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import api from '@/lib/api';
+import { formatDateTime } from '@/lib/dateUtils';
 
 export const AuditLogsPage: React.FC = () => {
   const [logs, setLogs] = useState<any[]>([]);
@@ -178,7 +179,7 @@ export const AuditLogsPage: React.FC = () => {
                 logs.map((log) => (
                   <tr key={log.id} className="hover:bg-zinc-50/60 transition-colors">
                     <td className="px-5 py-3 text-xs font-mono text-zinc-500 whitespace-nowrap">
-                      {new Date(log.created_at).toLocaleString()}
+                      {formatDateTime(log.created_at)}
                     </td>
                     <td className="px-5 py-3">
                       <div className="font-medium text-zinc-950">{log.causer?.name || 'System / Automated'}</div>
@@ -229,7 +230,7 @@ export const AuditLogsPage: React.FC = () => {
             <div className="space-y-2 text-xs">
               <div className="flex justify-between py-1 border-b border-zinc-300">
                 <span className="text-zinc-500">Timestamp:</span>
-                <span className="text-zinc-950 font-mono">{new Date(selectedLog.created_at).toLocaleString()}</span>
+                <span className="text-zinc-950 font-mono">{formatDateTime(selectedLog.created_at)}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-zinc-300">
                 <span className="text-zinc-500">Actor:</span>

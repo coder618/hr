@@ -59,7 +59,7 @@ class CoreDatabaseSeeder extends Seeder
                     'tagline' => 'Enterprise Multi-Tenant Solutions',
                     'timezone' => 'Asia/Dhaka',
                     'currency' => 'BDT',
-                    'date_format' => 'Y-m-d',
+                    'date_format' => 'd-m-Y',
                     'time_format' => 'H:i',
                     'primary_color' => '#4f46e5',
                     'secondary_color' => '#06b6d4',

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { formatDate } from '@/lib/dateUtils';
 import { Notice } from '../types/notice';
 import {
   Bell,
@@ -135,7 +136,7 @@ export const NoticeBoardPage: React.FC = () => {
                   {notice.published_at && (
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5 text-zinc-400" />
-                      {new Date(notice.published_at).toLocaleDateString()}
+                      {formatDate(notice.published_at)}
                     </span>
                   )}
                   {notice.creator && (

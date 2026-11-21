@@ -67,7 +67,7 @@ class EmployeeImportExportController extends Controller
                         $emp->designation?->name ?? '',
                         $emp->employment_type,
                         $emp->status,
-                        $emp->joining_date ? $emp->joining_date->format('Y-m-d') : '',
+                        $emp->joining_date ? $emp->joining_date->format('d-m-Y') : '',
                     ]);
                 });
 

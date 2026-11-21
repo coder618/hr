@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
+import { formatDate } from '@/lib/dateUtils';
 import { LeaveType, Holiday } from '../types/leave';
 import { Branch } from '../../employee/types/employee';
 import {
@@ -318,7 +319,7 @@ export const LeaveSettingsPage: React.FC = () => {
                     <td className="px-6 py-4 font-semibold text-zinc-950">{h.name}</td>
                     <td className="px-6 py-4">{h.branch?.name || 'All Branches (Company-wide)'}</td>
                     <td className="px-6 py-4">
-                      {h.from_date} {h.from_date !== h.to_date && `→ ${h.to_date}`}
+                      {formatDate(h.from_date)} {h.from_date !== h.to_date && `→ ${formatDate(h.to_date)}`}
                     </td>
                     <td className="px-6 py-4 font-medium">{h.total_days} {h.total_days === 1 ? 'day' : 'days'}</td>
                     <td className="px-6 py-4 text-right">

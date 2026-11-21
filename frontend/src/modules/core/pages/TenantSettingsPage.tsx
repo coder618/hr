@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { formatDate } from '@/lib/dateUtils';
 import {
   Save,
   Loader2,
@@ -50,7 +51,7 @@ export const TenantSettingsPage: React.FC = () => {
     favicon_url: '',
     timezone: 'Asia/Dhaka',
     currency: 'BDT',
-    date_format: 'Y-m-d',
+    date_format: 'd-m-Y',
     time_format: 'H:i',
     working_days: [1, 2, 3, 4, 5],
     address: '',
@@ -494,7 +495,7 @@ export const TenantSettingsPage: React.FC = () => {
                           {h.name}
                         </td>
                         <td className="px-4 py-3 font-mono text-zinc-600">
-                          {h.from_date} {h.from_date !== h.to_date && `→ ${h.to_date}`}
+                          {formatDate(h.from_date)} {h.from_date !== h.to_date && `→ ${formatDate(h.to_date)}`}
                         </td>
                         <td className="px-4 py-3">
                           <span className="px-2 py-0.5 rounded bg-zinc-100 border border-zinc-200 text-zinc-900 font-mono font-medium">
@@ -647,10 +648,11 @@ export const TenantSettingsPage: React.FC = () => {
                   Date Display Format
                 </label>
                 <select
-                  value={settings.date_format || 'Y-m-d'}
+                  value={settings.date_format || 'd-m-Y'}
                   onChange={(e) => setSettings({ ...settings, date_format: e.target.value })}
                   className="w-full bg-white border border-zinc-300 rounded-lg px-3.5 py-2.5 text-zinc-950 text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-colors"
                 >
+                  <option value="d-m-Y">DD-MM-YYYY (e.g. 20-11-2026)</option>
                   <option value="Y-m-d">YYYY-MM-DD (e.g. 2026-11-20)</option>
                   <option value="d/m/Y">DD/MM/YYYY (e.g. 20/11/2026)</option>
                   <option value="m/d/Y">MM/DD/YYYY (e.g. 11/20/2026)</option>

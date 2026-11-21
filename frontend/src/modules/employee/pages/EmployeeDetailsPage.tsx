@@ -29,36 +29,7 @@ import {
   MapPin,
   FolderKanban,
 } from 'lucide-react';
-
-const formatJoinDate = (dateStr?: string | null) => {
-  if (!dateStr) return '—';
-  const match = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
-  if (match) {
-    const [, year, month, day, hours = '00', minutes = '00'] = match;
-    return `${day}-${month}-${year} ${hours}:${minutes}`;
-  }
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return String(dateStr);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-  return `${day}-${month}-${year} ${hours}:${minutes}`;
-};
-
-const formatTimeOnly = (dateTimeStr?: string | null) => {
-  if (!dateTimeStr) return '—';
-  try {
-    const d = new Date(dateTimeStr);
-    if (isNaN(d.getTime())) return dateTimeStr;
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
-  } catch {
-    return dateTimeStr;
-  }
-};
+import { formatDate, formatTime } from '@/lib/dateUtils';
 
 const formatCurrency = (amount?: number | null) => {
   if (amount === undefined || amount === null) return '—';
@@ -268,7 +239,7 @@ export const EmployeeDetailsPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Calendar className="h-4 w-4 text-zinc-400 shrink-0" />
-                  <span>Joined: {formatJoinDate(employee.joining_date)}</span>
+                  <span>Joined: {formatDate(employee.joining_date)}</span>
                 </div>
               </div>
             </div>
@@ -370,7 +341,7 @@ export const EmployeeDetailsPage: React.FC = () => {
               </div>
               <div className="rounded-lg bg-zinc-50 p-3">
                 <span className="text-zinc-500">Joining Date</span>
-                <p className="mt-1 font-semibold text-zinc-950 font-mono">{formatJoinDate(employee.joining_date)}</p>
+                <p className="mt-1 font-semibold text-zinc-950 font-mono">{formatDate(employee.joining_date)}</p>
               </div>
             </div>
           </div>
@@ -462,7 +433,7 @@ export const EmployeeDetailsPage: React.FC = () => {
                             {proj.pivot?.role || 'Team Member'}
                           </span>{' '}
                           • Priority: <span className="capitalize">{proj.priority}</span>
-                          {proj.due_date && ` • Due: ${proj.due_date}`}
+                          {proj.due_date && ` • Due: ${formatDate(proj.due_date)}`}
                         </p>
                       </div>
 
@@ -514,7 +485,7 @@ export const EmployeeDetailsPage: React.FC = () => {
                           <p className="text-xs font-semibold text-zinc-950">{t.title}</p>
                           <span className="text-[11px] text-zinc-500">
                             {t.project ? `${t.project.title} (${t.project.code})` : 'General Task'}
-                            {t.due_date && ` • Due: ${t.due_date}`}
+                            {t.due_date && ` • Due: ${formatDate(t.due_date)}`}
                           </span>
                         </div>
                       </div>
@@ -553,18 +524,18 @@ export const EmployeeDetailsPage: React.FC = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                 <div className="rounded-lg bg-zinc-50 p-3">
                   <span className="text-zinc-500">Latest Logged Date</span>
-                  <p className="mt-1 font-semibold text-zinc-950 font-mono">{latestAttendance.date}</p>
+                  <p className="mt-1 font-semibold text-zinc-950 font-mono">{formatDate(latestAttendance.date)}</p>
                 </div>
                 <div className="rounded-lg bg-zinc-50 p-3">
                   <span className="text-zinc-500">Clock In</span>
                   <p className="mt-1 font-semibold text-zinc-950 font-mono">
-                    {formatTimeOnly(latestAttendance.clock_in)}
+                    {formatTime(latestAttendance.clock_in)}
                   </p>
                 </div>
                 <div className="rounded-lg bg-zinc-50 p-3">
                   <span className="text-zinc-500">Clock Out</span>
                   <p className="mt-1 font-semibold text-zinc-950 font-mono">
-                    {formatTimeOnly(latestAttendance.clock_out)}
+                    {formatTime(latestAttendance.clock_out)}
                   </p>
                 </div>
                 <div className="rounded-lg bg-zinc-50 p-3">
@@ -597,7 +568,7 @@ export const EmployeeDetailsPage: React.FC = () => {
                   <tbody className="divide-y divide-zinc-200 font-mono text-[11px]">
                     {attendanceRecords.slice(0, 10).map((att) => (
                       <tr key={att.id} className="hover:bg-zinc-50/50">
-                        <td className="px-3 py-2.5 font-medium text-zinc-950">{att.date}</td>
+                        <td className="px-3 py-2.5 font-medium text-zinc-950">{formatDate(att.date)}</td>
                         <td className="px-3 py-2.5 font-sans">
                           <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize ${
                             att.status === 'present'
@@ -609,8 +580,8 @@ export const EmployeeDetailsPage: React.FC = () => {
                             {att.status}
                           </span>
                         </td>
-                        <td className="px-3 py-2.5">{formatTimeOnly(att.clock_in)}</td>
-                        <td className="px-3 py-2.5">{formatTimeOnly(att.clock_out)}</td>
+                        <td className="px-3 py-2.5">{formatTime(att.clock_in)}</td>
+                        <td className="px-3 py-2.5">{formatTime(att.clock_out)}</td>
                         <td className="px-3 py-2.5 font-sans">
                           {att.work_minutes ? `${(att.work_minutes / 60).toFixed(1)} hrs` : '—'}
                         </td>
